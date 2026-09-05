@@ -1,0 +1,32 @@
+name: Build WLED with PIR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+      - run: pio run -e esp32dev_pir
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wled-esp32-pir
+          path: .pio/build/esp32dev_pir/firmware.bin
+          if-no-files-found: error
